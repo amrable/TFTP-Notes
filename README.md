@@ -109,3 +109,65 @@ contain the block number of the data packet being acknowledged.
 **Example for this error type**
 
 The following example demonstrates a correct operation of the protocol in which the above situation can occur. Host A sends a request to host B. Somewhere in the network, the request packet is duplicated, and as a result two acknowledgments are returned to host A, with different TID’s chosen on host B in response to the two requests. When the first response arrives, host A continues the connection. When the second response to the request arrives, it should be rejected, but there is no reason to terminate the first connection. Therefore, if different TID’s are chosen for the two connections on host B and host A checks the source TID’s of the messages it receives, the first connection can be maintained while the second is rejected by returning an error packet.
+
+### 5. TFTP Packets
+
+TFTP supports five types of packets, all of which have been mentioned
+above:
+|opcode | operation|
+|---|----|
+|1 | Read request (RRQ)|
+|2 | Write request (WRQ)|
+|3 | Data (DATA)|
+|4 | Acknowledgment (ACK)|
+|5 | Error (ERROR)|
+
+The TFTP header of a packet contains the opcode associated with that packet.
+
+**5.1RRQ/WRQ packet**
+
+|2 bytes|     string  |  1 byte   |  string |  1 byte |
+|-|-|-|-|-|
+| Opcode | Filename | 0 | Mode | 0| 
+
+- The file name is a sequence of bytes in netascii terminated by a zero byte. 
+- The mode field contains the string "netascii", "octet", or "mail".
+- Octet mode is used to transfer a file that is in the 8-bit format of the machine from which the file is being transferred.
+- It is assumed that each type of machine has a single 8-bit format that is more common, and that that format is chosen. 
+
+**5.2 DATA packet**
+
+|2 bytes  |   2 bytes    |  n bytes|
+|---------|--------------|-----------|
+| Opcode | Block # | Data | 
+
+
+- Data is actually transferred in DATA packets depicted in Figure 5-2. DATA packets (opcode = 3) have a block number and data field. 
+- The block numbers on data packets begin with one and increase by one for each new block of data. 
+- This restriction allows the program to use a single number to discriminate between new packets and duplicates.
+- The data field is from zero to 512 bytes long. If it is 512 bytes long, the block is not the last block of data; if it is from zero to 511 bytes long, it signals the end of the transfer. (See the section on Normal Termination for details.)
+
+
+### 5.3 Acknowledgments 
+
+All packets other than duplicate ACK’s and those used for termination are acknowledged unless a timeout occurs [4]. Sending a DATA packet is an acknowledgment for the first ACK packet of the previous DATA packet. The WRQ and DATA packets are acknowledged by ACK or ERROR packets, while RRQ and ACK packets are acknowledged by DATA or ERROR packets.
+
+|2 bytes  |   2 bytes|
+|---------|------------|
+| Opcode | Block # |
+
+- The opcode is 4. 
+- The block number in an ACK echoes the block number of the DATA packet being acknowledged. 
+- A WRQ is acknowledged with an ACK packet having a block number of zero.
+
+### 5. 4 Error Packet
+
+|2 bytes |    2 bytes  |    string  |  1 byte |
+|----------|-----------|-------------|-------|
+| Opcode | ErrorCode | ErrMsg | 0 | 
+
+- An ERROR packet (opcode 5) takes the form depicted in Figure 5-4. 
+- An ERROR packet can be the acknowledgment of any other type of packet. 
+- The error code is an integer indicating the nature of the error. 
+- A table of values and meanings is given in the appendix. (Note that several error codes have been added to this version of this document.) 
+- The error message is intended for human consumption, and should be in netascii. Like all other strings, it is terminated with a zero byte.

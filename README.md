@@ -85,3 +85,27 @@ consecutive and begin with one.
 - Since an acknowledgment packet is acknowledging a data packet, the acknowledgment packet will
 contain the block number of the data packet being acknowledged.
 - If the reply is an error packet, then the request has been denied.
+ 
+ ---
+ 
+- In order to create a connection, each end of the connection chooses a TID for itself, to be used for the duration of that connection.
+- TID’s chosen for a connection should be randomly chosen, so that the probability that the same number is chosen twice in immediate succession is very low.
+- Every packet has associated with it the two TID’s of the ends of the connection, the source TID and the destination TID.
+- These TID’s are handed to the supporting UDP (or other datagram protocol) as the source and destination ports
+- A requesting host chooses its source TID, and sends its initial request to the known TID 69 decimal (105 octal) on the serving host.
+-  The response to this request, uses a random TID chosen by the server as its source TID and the TID chosen for the previous message by the requestor as its destination TID.
+- The two chosen TID’s are then used for the remainder of the transfer.
+
+**Example shows how to establish a connection to write a file**
+
+1. Host A sends a "WRQ" to host B with source= A’s TID, destination= 69.
+2. Host B sends a "ACK" (with block number= 0) to host A with source= B’s TID, destination= A’s TID.
+
+**Wrong port error**
+- In the next step, and in all succeeding steps, the hosts should make sure that the source TID matches the value that was agreed on in steps 1 and 2. 
+- If a source TID does not match, the packet should be discarded as erroneously sent from somewhere else. 
+- An error packet should be sent to the source of the incorrect packet, while not disturbing the transfer.
+
+**Example for this error type**
+
+The following example demonstrates a correct operation of the protocol in which the above situation can occur. Host A sends a request to host B. Somewhere in the network, the request packet is duplicated, and as a result two acknowledgments are returned to host A, with different TID’s chosen on host B in response to the two requests. When the first response arrives, host A continues the connection. When the second response to the request arrives, it should be rejected, but there is no reason to terminate the first connection. Therefore, if different TID’s are chosen for the two connections on host B and host A checks the source TID’s of the messages it receives, the first connection can be maintained while the second is rejected by returning an error packet.

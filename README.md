@@ -1,4 +1,4 @@
-# TFTP-Notes
+# TFTP Trivial File Transfere Protocol
 
 ## Motivation 
 College course project [ **Computer Networks** ] 
@@ -53,3 +53,35 @@ This protocol is very restrictive, in order to simplify
 implementation. For example, the fixed length blocks make allocation
 straight forward, and the lock step acknowledgement provides flow
 control and eliminates the need to reorder incoming data packets.
+
+
+### 3. Relation to other Protocols
+- Since Datagram is implemented on the
+Internet protocol, packets will have an Internet header, a Datagram
+header, and a TFTP header.
+- TFTP does not specify any of the
+values in the Internet header. On the other hand, the source and
+destination port fields of the Datagram header (its format is given
+in the appendix) are used by TFTP and the length field reflects the
+size of the TFTP packet.
+- The Transfer IDentifiers (TID’s) used by
+TFTP are passed to the Datagram layer to be used as ports; therefore
+they must be between 0 and 65,535. The initialization of TID’s is
+discussed in the section on initial connection protocol.
+- The TFTP header consists of a 2 byte opcode field which indicates
+the packet’s type (e.g., DATA, ERROR, etc.) These opcodes and the
+formats of the various types of packets are discussed further in the
+section on TFTP packets.
+
+### 4. Initial Connection Protocol
+- A transfer is established by sending a request (WRQ to write onto a
+foreign file system, or RRQ to read from it), and receiving a
+positive reply, an acknowledgment packet for write, or the first data
+packet for read.
+- In general an acknowledgment packet will contain
+the block number of the data packet being acknowledged.
+- Each data packet has associated with it a block number; block numbers are
+consecutive and begin with one.
+- Since an acknowledgment packet is acknowledging a data packet, the acknowledgment packet will
+contain the block number of the data packet being acknowledged.
+- If the reply is an error packet, then the request has been denied.

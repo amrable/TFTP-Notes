@@ -173,3 +173,28 @@ All packets other than duplicate ACK’s and those used for termination are ackn
 - The error code is an integer indicating the nature of the error. 
 - A table of values and meanings is given in the appendix. (Note that several error codes have been added to this version of this document.) 
 - The error message is intended for human consumption, and should be in netascii. Like all other strings, it is terminated with a zero byte.
+
+### 6. Normal Termination
+
+- The end of a transfer is marked by a DATA packet that contains
+between 0 and 511 bytes of data (i.e., Datagram length < 516). This
+packet is acknowledged by an ACK packet like all other DATA packets.
+- The host acknowledging the final DATA packet may terminate its side
+of the connection on sending the final ACK.
+- On the other hand,
+dallying is encouraged. This means that the host sending the final
+ACK will wait for a while before terminating in order to retransmit
+the final ACK if it has been lost.
+- The acknowledger will know that
+the ACK has been lost if it receives the final DATA packet again.
+- The host sending the last DATA must retransmit it until the packet is
+acknowledged or the sending host times out.
+- If the response is an
+ACK, the transmission was completed successfully.
+- If the sender of
+the data times out and is not prepared to retransmit any more, the
+transfer may still have been completed successfully, after which the
+acknowledger or network may have experienced a problem.
+- It is also
+possible in this case that the transfer was unsuccessful. In any
+case, the connection has been closed.

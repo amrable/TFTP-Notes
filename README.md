@@ -198,3 +198,9 @@ acknowledger or network may have experienced a problem.
 - It is also
 possible in this case that the transfer was unsuccessful. In any
 case, the connection has been closed.
+
+### 7. Premature Termination
+
+- If a request can not be granted, or some error occurs during the
+transfer, then an ERROR packet (opcode 5) is sent. 
+- This is only a courtesy since it will not be retransmitted or acknowledged, so it may never be received. Timeouts must also be used to detect errors.
